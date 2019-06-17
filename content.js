@@ -30,7 +30,7 @@ function clickhandler(e) {
                 }
                 // ない場合は無視
             } else {
-                window.alert("もうストックないですよ")
+                window.alert("no more history")
             }
         } else { // 消す
             const myIDClass = getUniqID("idcls");
