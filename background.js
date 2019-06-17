@@ -4,7 +4,7 @@ chrome.runtime.onInstalled.addListener(function () {
         console.log("flag");
     });
 });
-
+chrome.browserAction.onClicked.addListener(toggleAndAction);
 chrome.commands.onCommand.addListener(function (command) {
     switch (command) {
         case "toggle_switch":
