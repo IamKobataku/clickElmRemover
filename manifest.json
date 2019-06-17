@@ -1,0 +1,35 @@
+{
+    "name": "Click Elm Remover",
+    "version": "0.0.0.1",
+    "description": "1.Change \"remove mode\"\n2.Click Elmement, Remove that.",
+    "manifest_version": 2,
+    "permissions": [
+        "storage",
+        "tabs"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ],
+        "persistent": false
+    },
+    "commands": {
+        "toggle_switch": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+E",
+                "mac": "Command+Shift+E"
+            },
+            "description": "toggle [normal mode] <-> [remove mode]"
+        }
+    }
+}
