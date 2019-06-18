@@ -1,15 +1,19 @@
+// インストール時にフラグを初期化する
 chrome.runtime.onInstalled.addListener(function () {
-    console.log("on install");
-    chrome.storage.local.set({ flag: false }, function () {
-        console.log("flag");
-    });
+    chrome.storage.local.set({ flag: false });
+    modeToNormal();
 });
+// ボタンクリックで切り替え
 chrome.browserAction.onClicked.addListener(toggleAndAction);
+
+// コマンドリスナ
 chrome.commands.onCommand.addListener(function (command) {
     switch (command) {
         case "toggle_switch":
             toggleAndAction();
             break;
+        case "redo_all":
+            sendMessage({ type: "redo_all" });
         default:
             console.log(`Unknown command: ${command}`);
     }
@@ -31,19 +35,22 @@ function toggleAndAction() {
 
 /** 削除モードへ */
 function modeToRemove() {
-    sendMessage(true)
+    chrome.browserAction.setBadgeText({ text: "ON" });
+    chrome.browserAction.setBadgeBackgroundColor({ color: [255, 0, 0, 100] });
+    sendMessage({ type: "toggle_switch", flag: true })
 }
 
 /** 通常モードへ */
 function modeToNormal() {
-    sendMessage(false);
+    chrome.browserAction.setBadgeText({ text: "OFF" });
+    chrome.browserAction.setBadgeBackgroundColor({ color: [128, 128, 128, 100] });
+    sendMessage({ type: "toggle_switch", flag: false });
 }
 
-function sendMessage(flag) {
+/** メッセージ送信 */
+function sendMessage(attr) {
     chrome.tabs.query({ active: true }, function (tab) {
-        chrome.tabs.sendMessage(tab[0].id, { flag: flag }, function (response) {
-            console.log(`sendMessage callback: ${response.farewell}`);
-        });
+        chrome.tabs.sendMessage(tab[0].id, attr);
     })
 }
 

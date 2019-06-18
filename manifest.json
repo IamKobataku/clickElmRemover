@@ -3,6 +3,7 @@
     "version": "0.0.0.1",
     "description": "1.Change \"remove mode\"\n2.Click Elmement, Remove that.",
     "manifest_version": 2,
+    "homepage_url": "https://github.com/kobatakuJP/clickElmRemover",
     "permissions": [
         "storage",
         "tabs"
@@ -24,7 +25,7 @@
         "persistent": false
     },
     "browser_action": {
-        "name": "toggle [normal mode] <-> [remove mode]",
+        "default_title": "Click elm remover.\ntoggle [normal mode] <-> [remove mode]",
         "default_icon": "icon19.png"
     },
     "icons": {
@@ -39,6 +40,13 @@
                 "mac": "Command+Shift+E"
             },
             "description": "toggle [normal mode] <-> [remove mode]"
+        },
+        "redo_all": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+A",
+                "mac": "Command+Shift+A"
+            },
+            "description": "redo all element."
         }
     }
 }
