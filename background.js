@@ -9,6 +9,8 @@ chrome.runtime.onInstalled.addListener(function() {
 chrome.browserAction.onClicked.addListener(toggleAndAction);
 // タブの変更を検知する
 chrome.tabs.onActivated.addListener(resetAndAction);
+// タブの更新(画面遷移とか)を検知する
+chrome.tabs.onUpdated.addListener(resetAndAction);
 
 // コマンドリスナ
 chrome.commands.onCommand.addListener(function(command) {
