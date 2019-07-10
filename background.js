@@ -2,11 +2,13 @@
 chrome.runtime.onInstalled.addListener(function() {
   chrome.storage.local.set({ flag: false });
   // 削除するDOMの履歴用オブジェクトをローカルストレージに保管する
-  chrome.storage.local.set({ domcollection: [] }); // domcollection: {[tabid:number]: {idcls:string, dispBack:string}[]}
+  chrome.storage.local.set({ domcollection: {} }); // domcollection: [tabid:number]: {idcls:string, dispBack:string}[]
   modeToNormal();
 });
 // ボタンクリックで切り替え
 chrome.browserAction.onClicked.addListener(toggleAndAction);
+// タブの変更を検知する
+chrome.tabs.onActivated.addListener(resetAndAction);
 
 // コマンドリスナ
 chrome.commands.onCommand.addListener(function(command) {
@@ -26,10 +28,16 @@ chrome.commands.onCommand.addListener(function(command) {
   }
 });
 
-function toggleAndAction() {
-  // 今のフラグを取得して反転させて
+/** 現在のモードを反転させる */
+function toggleAndAction(){modeSet(true);}
+
+/** モードを反転させずに再セットする */
+function resetAndAction(){modeSet(false);}
+
+/** モードを選択する @param toggle 現在のモードと反転するか、そのまま通知するかのフラグ */
+function modeSet(toggle) {
   chrome.storage.local.get(["flag"], function(result) {
-    const updateFlag = !result.flag;
+    const updateFlag = toggle ? !result.flag : result.flag;
     chrome.storage.local.set({ flag: updateFlag }, function() {
       if (updateFlag) {
         modeToRemove();
@@ -54,8 +62,8 @@ function modeToNormal() {
   sendMessage({ type: "toggle_switch", flag: false });
 }
 
+/** 全て戻す */
 function allRedo() {
-  //   sendMessage({ type: "redo_all" });
   chrome.tabs.query({ active: true }, function(tab) {
     const tabid = tab[0].id;
     chrome.storage.local.get(["domcollection"], function(dc) {
@@ -111,6 +119,7 @@ function takeRedoObj(tabid, sendResponse) {
       result = col.pop();
     }
     sendResponse(result);
+    chrome.storage.local.set({ domcollection: dc.domcollection });
   });
 }
 

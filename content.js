@@ -1,5 +1,3 @@
-chrome.storage.local.set({ userSelect: document.body.style.userSelect });
-
 // リスナ
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // console.log(sender.tab ?
@@ -27,23 +25,37 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 /** 機能ON */
 function turnOn() {
   addEvent(window);
+  backupUserSelectAndToNone(window);
   const iframes = document.getElementsByTagName("iframe");
   for (let i = 0, l = iframes.length; i < l; i++) {
     addEvent(iframes[i].contentWindow);
+    backupUserSelectAndToNone(iframes[i].contentWindow)
   }
-  document.body.style.userSelect = "none";
 }
 
 /** 機能OFF */
 function turnOff() {
   removeEvent(window);
+  restoreUserSelect(window);
   const iframes = document.getElementsByTagName("iframe");
   for (let i = 0, l = iframes.length; i < l; i++) {
     removeEvent(iframes[i].contentWindow);
+    restoreUserSelect(iframes[i].contentWindow)
   }
-  chrome.storage.local.get(["userSelect"], function(result) {
-    document.body.style.userSelect = result.userSelect;
-  });
+}
+
+function backupUserSelectAndToNone(w) {
+  if (w.backupUserSelect === undefined) {
+    w.backupUserSelect = w.document.body.style.userSelect;
+  }
+  w.document.body.style.userSelect = "none";
+}
+
+function restoreUserSelect(w) {
+  if (w.backupUserSelect !== undefined){
+    w.document.body.style.userSelect = w.backupUserSelect;
+  }
+  // バックアップない場合は無理しない
 }
 
 function addEvent(w) {
