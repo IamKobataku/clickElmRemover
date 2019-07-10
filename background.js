@@ -6,11 +6,11 @@ chrome.runtime.onInstalled.addListener(function() {
   modeToNormal();
 });
 // ボタンクリックで切り替え
-chrome.browserAction.onClicked.addListener(toggleAndAction);
+chrome.browserAction.onClicked.addListener(() => modeSet(true));
 // タブの変更を検知する
-chrome.tabs.onActivated.addListener(resetAndAction);
+chrome.tabs.onActivated.addListener(() => modeSet(false));
 // タブの更新(画面遷移とか)を検知する
-chrome.tabs.onUpdated.addListener(resetAndAction);
+chrome.tabs.onUpdated.addListener(() => modeSet(false));
 
 // コマンドリスナ
 chrome.commands.onCommand.addListener(function(command) {
@@ -30,13 +30,7 @@ chrome.commands.onCommand.addListener(function(command) {
   }
 });
 
-/** 現在のモードを反転させる */
-function toggleAndAction(){modeSet(true);}
-
-/** モードを反転させずに再セットする */
-function resetAndAction(){modeSet(false);}
-
-/** モードを選択する @param toggle 現在のモードと反転するか、そのまま通知するかのフラグ */
+/** モードを再セットする @param toggle 現在のモードと反転するか、そのまま通知するかのフラグ */
 function modeSet(toggle) {
   chrome.storage.local.get(["flag"], function(result) {
     const updateFlag = toggle ? !result.flag : result.flag;
