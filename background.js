@@ -16,7 +16,7 @@ chrome.tabs.onUpdated.addListener(() => modeSet(false));
 chrome.commands.onCommand.addListener(function(command) {
   switch (command) {
     case "toggle_switch":
-      toggleAndAction();
+      modeSet(true);
       break;
     case "remove":
       break;
