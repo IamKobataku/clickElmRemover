@@ -27,12 +27,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 /** 機能ON */
 function turnOn() {
   addEvent();
+  addCss();
   backupUserSelectAndToNone();
 }
 
 /** 機能OFF */
 function turnOff() {
   removeEvent();
+  removeCss();
   restoreUserSelect(window);
 }
 
@@ -56,10 +58,33 @@ function addEvent() {
   }
 }
 
+const styleElmID = "clickElmRemover-style-id";
+/** 必要なCSSを追加する */
+function addCss() {
+  let styleEl = document.getElementById(styleElmID);
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = styleElmID;
+    document.head.appendChild(styleEl);
+    const styleSheet = styleEl.sheet;
+    styleSheet.insertRule("iframe{pointer-events:none;}");
+  }
+  // すでにスタイルがあるならそれでいいのでなにもしない
+}
+
 /** クリックイベントのみ削除(iframeイベントの削除が冗長になる割に見返り少ないため) */
 function removeEvent() {
   window.removeEventListener("click", clickhandler, true);
   window.removeEventListener("click", blurHandler, true);
+}
+
+/** CSSを除去する */
+function removeCss() {
+  let styleEl = document.getElementById(styleElmID);
+  if(styleEl) {
+    styleEl.parentNode.removeChild(styleEl);
+  }
+  // 既にスタイルがないならそれでいいのでなにもしない
 }
 
 /** iframeのコンテナ要素を洗い出す */
