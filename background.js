@@ -64,8 +64,10 @@ function allRedo() {
     const tabid = tab[0].id;
     chrome.storage.local.get(["domcollection"], function(dc) {
       const col = dc.domcollection[tabid];
-      for (let o = col.pop(); o; o = col.pop()) {
-        redoElm(o);
+      if (col){
+        for (let o = col.pop(); o; o = col.pop()) {
+          redoElm(o);
+        }
       }
       chrome.storage.local.set({ domcollection: [] });
     });
