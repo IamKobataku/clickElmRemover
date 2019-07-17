@@ -163,6 +163,7 @@ function blurHandler(e) {
       chrome.runtime.sendMessage(o);
     }
   }
+  document.body.focus(); // 最後にbodyにフォーカスを戻す。iframe連続クリック対策。
 }
 
 /** 指定Elementを消す */
