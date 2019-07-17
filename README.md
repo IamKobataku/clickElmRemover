@@ -3,7 +3,7 @@
 Chrome Extention.  
 Remove clicked element.  
 
-![sample](./sample.gif)
+![demo](./img/demo.gif)
 
 ## quick start
 
@@ -19,7 +19,7 @@ toggle between [remove mode] and [normal mode] as following.
 
 - [`Ctrl`+`Shift`+`e`] or [Icon click]  
 
-![ON](./on.png) <-> ![OFF](./off.png)
+![ON](./img/on.png) <-> ![OFF](./img/off.png)
 
 ### remove
 

@@ -26,12 +26,12 @@
     },
     "browser_action": {
         "default_title": "Click elm remover.\ntoggle [normal mode] <-> [remove mode]",
-        "default_icon": "icon19.png"
+        "default_icon": "img/icon19.png"
     },
     "icons": {
-        "32": "icon32.png",
-        "48": "icon48.png",
-        "128": "icon128.png"
+        "32": "img/icon32.png",
+        "48": "img/icon48.png",
+        "128": "img/icon128.png"
     },
     "commands": {
         "toggle_switch": {
