@@ -1,3 +1,5 @@
+window.mouseOverIframeClsName = ""
+
 // リスナ
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // console.log(sender.tab ?
@@ -24,46 +26,72 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 /** 機能ON */
 function turnOn() {
-  addEvent(window);
-  backupUserSelectAndToNone(window);
-  const iframes = document.getElementsByTagName("iframe");
-  for (let i = 0, l = iframes.length; i < l; i++) {
-    addEvent(iframes[i].contentWindow);
-    backupUserSelectAndToNone(iframes[i].contentWindow)
-  }
+  addEvent();
+  backupUserSelectAndToNone();
 }
 
 /** 機能OFF */
 function turnOff() {
-  removeEvent(window);
+  removeEvent();
   restoreUserSelect(window);
-  const iframes = document.getElementsByTagName("iframe");
-  for (let i = 0, l = iframes.length; i < l; i++) {
-    removeEvent(iframes[i].contentWindow);
-    restoreUserSelect(iframes[i].contentWindow)
+}
+
+/** クリックイベントの追加とiframeのイベント追加 */
+function addEvent() {
+  window.addEventListener("click", clickhandler, true);
+  window.addEventListener('blur', blurHandler, true);
+  
+  // ここからiframeの処理、iframeに該当するもの全部拾ってイベントセットする
+  if (!window.addedIframeEvent) {
+    window.addedIframeEvent = true;
+    const iframes = searchIframes(document);
+    const pref = getRandomPref();
+    for (let i = 0, l = iframes.length; i < l; i++) {
+      const clsid = getUniqID(pref);
+      iframes[i].classList.add(clsid);
+      // このイベント消すのめんどいのでそのままにするつもり
+      iframes[i].addEventListener("mouseover", () => {window.mouseOverIframeClsName = clsid});
+      iframes[i].addEventListener("mouseout", () => {window.mouseOverIframeClsName = ""});
+    }
   }
 }
 
-function backupUserSelectAndToNone(w) {
-  if (w.backupUserSelect === undefined) {
-    w.backupUserSelect = w.document.body.style.userSelect;
-  }
-  w.document.body.style.userSelect = "none";
+/** クリックイベントのみ削除(iframeイベントの削除が冗長になる割に見返り少ないため) */
+function removeEvent() {
+  window.removeEventListener("click", clickhandler, true);
+  window.removeEventListener("click", blurHandler, true);
 }
 
+/** iframeのコンテナ要素を洗い出す */
+function searchIframes(elm) {
+  /** iframeを格納している要素群 */
+  let result = [];
+  if (elm.tagName === "IFRAME") {
+    return [elm];
+  }
+  const children = elm.children;
+  if (children.length > 0) {
+    for (let i = 0, l = children.length;i<l;i++) {
+      Array.prototype.push.apply(result, searchIframes(children[i]));
+    }
+  }
+  return result;
+}
+
+/** bodyのuserSelectの値をバックアップしておいてnoneに設定 */
+function backupUserSelectAndToNone() {
+  if (window.backupUserSelect === undefined) {
+    window.backupUserSelect = window.document.body.style.userSelect;
+  }
+  window.document.body.style.userSelect = "none";
+}
+
+/** bodyのuserSelectを戻す */
 function restoreUserSelect(w) {
   if (w.backupUserSelect !== undefined){
     w.document.body.style.userSelect = w.backupUserSelect;
   }
-  // バックアップない場合は無理しない
-}
-
-function addEvent(w) {
-  w.addEventListener("click", clickhandler, true);
-}
-
-function removeEvent(w) {
-  w.removeEventListener("click", clickhandler, true);
+  // バックアップない場合はなにもしない
 }
 
 /** クリック時のイベントハンドラ */
@@ -88,6 +116,30 @@ function clickhandler(e) {
   return false;
 }
 
+function blurHandler(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (e.shiftKey) {
+    // redo
+    chrome.runtime.sendMessage({ type: "getRedo" }, function(response) {
+      if (response) {
+        redoElm(response);
+      } else {
+        window.alert("no more history");
+      }
+    });
+  } else {
+    // remove
+    // 削除対象がiframeかどうかを判別してターゲットを変える
+    if (window.mouseOverIframeClsName !== "") {
+      const elm = document.getElementsByClassName(window.mouseOverIframeClsName)[0]
+      const o = removeElm(elm);
+      o.type = "remove"; // メッセージのタイプを挿入
+      chrome.runtime.sendMessage(o);
+    }
+  }
+}
+
 /** 指定Elementを消す */
 function removeElm(target) {
   const myIDClass = getUniqID("idclsForCER");
@@ -110,4 +162,16 @@ function redoElm(obj) {
 /** ランダムな文字列を渡す */
 function getUniqID(pref) {
   return `${pref}_${Math.floor(Math.random() * 1000000)}_${Date.now()}`;
+}
+
+/** 4～10文字のランダム文字列を返す */
+function getRandomPref() {
+  const l = 4 + Math.floor(Math.random() * 7);
+  const c = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const cl = c.length;
+  let r = "";
+  for(var i=0; i<l; i++){
+    r += c[Math.floor(Math.random()*cl)];
+  }
+  return r;
 }
