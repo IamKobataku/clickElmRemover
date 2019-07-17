@@ -47,7 +47,7 @@ function addEvent() {
   if (!window.addedIframeEvent) {
     window.addedIframeEvent = true;
     const iframes = searchIframes(document);
-    const pref = getRandomPref();
+    const pref = getRandomPref(); // なぜわざわざランダムIDの接頭語をさらにランダムにするのか？⇒対策されて接頭語*のクラス名を除去するようなスクリプトを組まれないように
     for (let i = 0, l = iframes.length; i < l; i++) {
       const clsid = getUniqID(pref);
       iframes[i].classList.add(clsid);
