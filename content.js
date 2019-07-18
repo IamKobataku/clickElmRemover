@@ -75,7 +75,7 @@ function addCss() {
 /** クリックイベントのみ削除(iframeイベントの削除が冗長になる割に見返り少ないため) */
 function removeEvent() {
   window.removeEventListener("click", clickhandler, true);
-  window.removeEventListener("click", blurHandler, true);
+  window.removeEventListener("blur", blurHandler, true);
 }
 
 /** CSSを除去する */
@@ -141,6 +141,7 @@ function clickhandler(e) {
   return false;
 }
 
+/** フォーカスアウト時のイベントハンドラ。iframe用。 */
 function blurHandler(e) {
   e.preventDefault();
   e.stopPropagation();
