@@ -38,7 +38,7 @@ function turnOff() {
 }
 
 /** Iframeにイベントを付与済みであるかどうか */
-let AddedIframeEvent = false;
+let AddedIframeEventFlag = false;
 /** クリックイベントの追加とiframeのイベント追加 */
 function addEvent() {
   window.addEventListener("click", clickhandler, true);
@@ -52,7 +52,7 @@ function addIframeSetting() {
   const pref = getRandomPref(); // なぜわざわざランダムIDの接頭語をさらにランダムにするのか？⇒対策されて接頭語*のクラス名を除去するようなスクリプトを組まれないように
   for (let i = 0, l = iframes.length; i < l; i++) {
     setSandForIframe(iframes[i]);
-    if (!AddedIframeEvent){
+    if (!AddedIframeEventFlag){
       // iframeにhoverイベント付与していないなら付与する。このイベント及びクラスIDは付与しっぱなしになる。
       const clsid = getUniqID(pref);
       iframes[i].classList.add(clsid);
@@ -61,7 +61,7 @@ function addIframeSetting() {
       iframes[i].addEventListener("mouseout", () => {window.mouseOverIframeClsName = ""});
     }
   }
-  AddedIframeEvent = true;
+  AddedIframeEventFlag = true;
 }
 
 /** iframeにsandbox属性を付与するが、もともとついてるパターンもあるはずなのでバックアップ用のオリジナルattributeを用意する */
