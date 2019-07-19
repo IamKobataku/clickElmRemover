@@ -29,6 +29,22 @@ class ClickElmRemover {
   static SANDBOX_BACKUP_ATTR_KEY = "SANDBOX_BACKUP_ATTR_KEY";
   /** user-selectの値をバックアップしておく */
   static backupUserSelect = undefined;
+  /** フィルタ用のSVG要素をオンメモリに持っておく */
+  static filter = (function() {
+    const feBlend = document.createElementNS("http://www.w3.org/2000/svg", "feBlend");
+    feBlend.setAttribute("in", "SourceGraphic"); feBlend.setAttribute("in2", "floodFill"); feBlend.setAttribute("mode","multiply");
+    const feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+    feFlood.setAttribute("result","floodFill"); feFlood.setAttribute("flood-color", "yellowgreen"); feFlood.setAttribute("flood-opacity", "0.7");
+    const filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+    filter.id="spotlight";filter.setAttribute("x", "0%");filter.setAttribute("y","0%");filter.setAttribute("width","100%");filter.setAttribute("height", "100%");
+    filter.appendChild(feFlood);filter.appendChild(feBlend);
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    defs.appendChild(filter);
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.pointerEvents = "none"; svg.style.width = 0; svg.style.height =0;
+    svg.appendChild(defs);
+    document.body.appendChild(svg)
+  })();
 
   /** 機能ON */
   static turnOn  () {
@@ -47,6 +63,8 @@ class ClickElmRemover {
   static addEvent () {
     window.addEventListener("click", this.clickhandler, true);
     window.addEventListener('blur', this.blurHandler, true);
+    window.addEventListener("mouseover", this.mouseoverHandler, true);
+    window.addEventListener("mouseout", this.mouseoutHandler, true);
     this.addIframeSetting();
   }
 
@@ -83,6 +101,8 @@ class ClickElmRemover {
   static removeEvent() {
     window.removeEventListener("click", this.clickhandler, true);
     window.removeEventListener("blur", this.blurHandler, true);
+    window.removeEventListener("mouseover", this.mouseoverHandler, true);
+    window.removeEventListener("mouseout", this.mouseoutHandler, true);
     this.restoreIframeSetting();
   }
 
@@ -141,12 +161,12 @@ class ClickElmRemover {
   }
 
   /** クリック時のイベントハンドラ */
-  static clickhandler(e) {
+  static clickhandler = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.shiftKey) {
       // redo
-      chrome.runtime.sendMessage({ type: "getRedo" }, function(response) {
+      chrome.runtime.sendMessage({ type: "getRedo" }, (response) => {
         if (response) {
           this.redoElm(response);
         } else {
@@ -163,12 +183,12 @@ class ClickElmRemover {
   }
 
   /** フォーカスアウト時のイベントハンドラ。iframe用。 */
-  static  blurHandler (e) {
+  static  blurHandler = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.shiftKey) {
       // redo
-      chrome.runtime.sendMessage({ type: "getRedo" }, function(response) {
+      chrome.runtime.sendMessage({ type: "getRedo" }, (response) => {
         if (response) {
           this.redoElm(response);
         } else {
@@ -195,6 +215,14 @@ class ClickElmRemover {
     const dispBack = target.style.display;
     target.style.display = "none";
     return { idcls: myIDClass, dispBack: dispBack };
+  }
+
+  static mouseoverHandler = (e) => {
+    e.target.style.filter = "url(#spotlight)";
+  }
+
+  static mouseoutHandler = (e) => {
+    e.target.style.filter = "";
   }
 
   /** 消していたElementを再表示する */
