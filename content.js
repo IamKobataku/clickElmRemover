@@ -30,7 +30,7 @@ class ClickElmRemover {
   /** user-selectの値をバックアップしておく */
   static backupUserSelect = undefined;
   /** フィルタ用のSVG要素をオンメモリに持っておく */
-  static filter = (function() {
+  static filter = (() => {
     const feBlend = document.createElementNS("http://www.w3.org/2000/svg", "feBlend");
     feBlend.setAttribute("in", "SourceGraphic"); feBlend.setAttribute("in2", "floodFill"); feBlend.setAttribute("mode","multiply");
     const feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
@@ -45,6 +45,15 @@ class ClickElmRemover {
     svg.appendChild(defs);
     document.body.appendChild(svg)
   })();
+  /** フィルタをスポットライトと表現しているが、そのクラス名。 */
+  static SPOTLIGHT_CLASS_NAME = this.getUniqID("spot");
+  /** スポットライト指定用のCSSを生成。 */
+  static addCSS = (() => {
+    const styleEl = document.createElement('style');
+    document.head.appendChild(styleEl);
+    const styleSheet = styleEl.sheet;
+    styleSheet.insertRule(`.${this.SPOTLIGHT_CLASS_NAME}{filter:url(#spotlight);}`);
+  })();
 
   /** 機能ON */
   static turnOn  () {
@@ -57,6 +66,7 @@ class ClickElmRemover {
   static turnOff  () {
     this.removeEvent();
     this.restoreUserSelect();
+    this.removeSpotlight();
   }
 
   /** クリックイベントの追加とiframeのイベント追加 */
@@ -160,6 +170,14 @@ class ClickElmRemover {
     // バックアップない場合はなにもしない
   }
 
+  /** スポットライトを消す */
+  static removeSpotlight() {
+    const elms = document.getElementsByClassName(this.SPOTLIGHT_CLASS_NAME);
+    for (let i = 0, l = elms.length; i < l; i++) {
+      elms[i].classList.remove(this.SPOTLIGHT_CLASS_NAME);
+    }
+  }
+
   /** クリック時のイベントハンドラ */
   static clickhandler = (e) => {
     e.preventDefault();
@@ -218,11 +236,11 @@ class ClickElmRemover {
   }
 
   static mouseoverHandler = (e) => {
-    e.target.style.filter = "url(#spotlight)";
+    e.target.classList.add(this.SPOTLIGHT_CLASS_NAME);
   }
 
   static mouseoutHandler = (e) => {
-    e.target.style.filter = "";
+    e.target.classList.remove(this.SPOTLIGHT_CLASS_NAME);
   }
 
   /** 消していたElementを再表示する */
