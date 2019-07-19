@@ -41,7 +41,7 @@ class ClickElmRemover {
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
     defs.appendChild(filter);
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.pointerEvents = "none"; svg.style.width = 0; svg.style.height =0;
+    svg.style.width = 0; svg.style.height =0;
     svg.appendChild(defs);
     document.body.appendChild(svg)
   })();
