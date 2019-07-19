@@ -27,28 +27,33 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 /** 機能ON */
 function turnOn() {
   addEvent();
-  addCss();
   backupUserSelectAndToNone();
+  document.body.focus(); // iframe削除に備えてフォーカス移動しておく
 }
 
 /** 機能OFF */
 function turnOff() {
   removeEvent();
-  removeCss();
   restoreUserSelect(window);
 }
 
+/** Iframeにイベントを付与済みであるかどうか */
+let AddedIframeEvent = false;
 /** クリックイベントの追加とiframeのイベント追加 */
 function addEvent() {
   window.addEventListener("click", clickhandler, true);
   window.addEventListener('blur', blurHandler, true);
-  
-  // ここからiframeの処理、iframeに該当するもの全部拾ってイベントセットする
-  if (!window.addedIframeEvent) {
-    window.addedIframeEvent = true;
-    const iframes = searchIframes(document);
-    const pref = getRandomPref(); // なぜわざわざランダムIDの接頭語をさらにランダムにするのか？⇒対策されて接頭語*のクラス名を除去するようなスクリプトを組まれないように
-    for (let i = 0, l = iframes.length; i < l; i++) {
+  addIframeSetting();
+}
+
+/** iframeに対する設定の追加。クラスIDやイベントリスナなど */
+function addIframeSetting() {
+  const iframes = searchIframes(document);
+  const pref = getRandomPref(); // なぜわざわざランダムIDの接頭語をさらにランダムにするのか？⇒対策されて接頭語*のクラス名を除去するようなスクリプトを組まれないように
+  for (let i = 0, l = iframes.length; i < l; i++) {
+    setSandForIframe(iframes[i]);
+    if (!AddedIframeEvent){
+      // iframeにhoverイベント付与していないなら付与する。このイベント及びクラスIDは付与しっぱなしになる。
       const clsid = getUniqID(pref);
       iframes[i].classList.add(clsid);
       // このイベント消すのめんどいのでそのままにするつもり
@@ -56,35 +61,48 @@ function addEvent() {
       iframes[i].addEventListener("mouseout", () => {window.mouseOverIframeClsName = ""});
     }
   }
+  AddedIframeEvent = true;
 }
 
-const styleElmID = "clickElmRemover-style-id";
-/** 必要なCSSを追加する */
-function addCss() {
-  let styleEl = document.getElementById(styleElmID);
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = styleElmID;
-    document.head.appendChild(styleEl);
-    const styleSheet = styleEl.sheet;
-    styleSheet.insertRule("iframe{pointer-events:none;}");
+/** iframeにsandbox属性を付与するが、もともとついてるパターンもあるはずなのでバックアップ用のオリジナルattributeを用意する */
+const SANDBOX_BACKUP_ATTR_KEY = "SANDBOX_BACKUP_ATTR_KEY";
+/** iframeにsandboxを付与する。 */
+function setSandForIframe(iframe) {
+  const nowAttr = iframe.getAttribute("sandbox");
+  const backAttr = iframe.getAttribute(SANDBOX_BACKUP_ATTR_KEY);
+  if (backAttr === null) {
+    // backがないなら初ONなのでバックアップする(nullの場合は"null"と入るので注意)
+    iframe.setAttribute(SANDBOX_BACKUP_ATTR_KEY, nowAttr);
   }
-  // すでにスタイルがあるならそれでいいのでなにもしない
+  iframe.setAttribute("sandbox", "");
 }
 
 /** クリックイベントのみ削除(iframeイベントの削除が冗長になる割に見返り少ないため) */
 function removeEvent() {
   window.removeEventListener("click", clickhandler, true);
   window.removeEventListener("blur", blurHandler, true);
+  restoreIframeSetting();
 }
 
-/** CSSを除去する */
-function removeCss() {
-  let styleEl = document.getElementById(styleElmID);
-  if(styleEl) {
-    styleEl.parentNode.removeChild(styleEl);
+/** iframeの設定をリストア */
+function restoreIframeSetting() {
+  const iframes = searchIframes(document);
+  for (let i = 0, l = iframes.length; i < l; i++) {
+    restoreSandForIframe(iframes[i]);
   }
-  // 既にスタイルがないならそれでいいのでなにもしない
+}
+
+function restoreSandForIframe(iframe) {
+  const backAttr = iframe.getAttribute(SANDBOX_BACKUP_ATTR_KEY);
+  if(backAttr === null) {
+    // まだ一度もsandboxをセットしていないパターン。変更しない。
+  } else if (backAttr === "null") {
+    // 元々sandboxが設定されていなかったパターン
+    iframe.removeAttribute("sandbox");
+  } else {
+    // リストアすべきパターン
+    iframe.setAttribute("sandbox", backAttr);
+  }
 }
 
 /** iframeのコンテナ要素を洗い出す */
