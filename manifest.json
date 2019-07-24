@@ -1,12 +1,12 @@
 {
     "name": "Click Elm Remover",
-    "version": "0.5.0.0",
+    "version": "0.5.0.1",
     "description": "1.Change \"remove mode\"\n2.Click Elmement, Remove that.",
     "manifest_version": 2,
     "homepage_url": "https://github.com/kobatakuJP/clickElmRemover",
     "permissions": [
         "storage",
-        "tabs"
+        "activeTab"
     ],
     "content_scripts": [
         {
