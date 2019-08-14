@@ -1,6 +1,7 @@
 # Click Elm Remover
 
 Chrome Extention.  
+install from [here](https://chrome.google.com/webstore/detail/click-elm-remover/ppmohafafgjadkpcoijndlhljdkddiig).  
 Remove clicked element.  
 
 ![demo](./notForDevImg/demo.gif)
