@@ -181,23 +181,24 @@ class ClickElmRemover {
   /** クリック時のイベントハンドラ */
   static clickhandler = (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    if (e.shiftKey) {
-      // redo
-      chrome.runtime.sendMessage({ type: "getRedo" }, (response) => {
-        if (response) {
-          this.redoElm(response);
-        } else {
-          window.alert("no more history");
-        }
-      });
-    } else {
-      // remove
-      const o = this.removeElm(e.target);
-      o.type = "remove"; // メッセージのタイプを挿入
-      chrome.runtime.sendMessage(o);
-    }
-    return false;
+    // e.stopPropagation(); // stopPropagationで本アカの方もとまるな。なぜやろ。
+    alert("content")
+    // if (e.shiftKey) {
+    //   // redo
+    //   chrome.runtime.sendMessage({ type: "getRedo" }, (response) => {
+    //     if (response) {
+    //       this.redoElm(response);
+    //     } else {
+    //       window.alert("no more history");
+    //     }
+    //   });
+    // } else {
+    //   // remove
+    //   const o = this.removeElm(e.target);
+    //   o.type = "remove"; // メッセージのタイプを挿入
+    //   chrome.runtime.sendMessage(o);
+    // }
+    // return false;
   }
 
   /** フォーカスアウト時のイベントハンドラ。iframe用。 */
